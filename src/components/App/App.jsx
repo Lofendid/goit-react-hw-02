@@ -9,6 +9,13 @@ export default function App() {
   const LS_FEEDBACK = 'feedback';
 
   function rateInnit() {
+    // ? It was made in a way that the app could be scaled in future
+
+    // * You can simply add a new option (property to a 'rate' object) BELOW
+    // * It'll render itself and work, but
+    // ! after you manually delete 'feedback' in a browser Local Storage
+    // ! In order to delete any property you've got to delete 'feedback' in LS again too
+
     const rate = {
       good: 0,
       neutral: 0,
@@ -29,8 +36,7 @@ export default function App() {
 
   useEffect(recordToLocal, [rate]);
 
-  // * You can simply add a new option (property to a rate object) ABOVE and it'll render itself
-  // ! Only add name of the new option in the array badFeedbackKeys BELOW if it's considered as a "bad feedback" variety
+  // ! Only add name of your new option in the array badFeedbackKeys BELOW if it's considered as a "bad feedback" variety
 
   const badFeedbackKeys = ['bad', 'poor'];
   const badFeedback = Object.fromEntries(
