@@ -4,62 +4,65 @@ import { useEffect, useState } from 'react';
 import Description from '../Description/Description.jsx';
 import Options from '../Options/Options.jsx';
 import Feedback from '../Feedback/Feedback.jsx';
+import Notification from '../Notification/Notification.jsx';
 
 export default function App() {
   const LS_FEEDBACK = 'feedback';
 
-  function rateInnit() {
-    // ? It was made in a way that the app could be scaled in future
-
-    // * You can simply add a new option (property to a 'rate' object) BELOW
-    // * It'll render itself and work, but
-    // ! after you manually delete 'feedback' in a browser Local Storage
-    // ! In order to delete any property you've got to delete 'feedback' in LS again too
-
-    const rate = {
+  function feedbackInnit() {
+    const feedbackCounts = {
       good: 0,
       neutral: 0,
       bad: 0,
-      awesome: 0,
-      poor: 0,
     };
-    const savedRate = JSON.parse(localStorage.getItem(LS_FEEDBACK));
+    const savedFeedbackCounts = JSON.parse(localStorage.getItem(LS_FEEDBACK));
 
-    return savedRate || rate;
+    return savedFeedbackCounts || feedbackCounts;
   }
 
-  const [rate, setRate] = useState(rateInnit);
+  const [feedbackCounts, setFeedbackCounts] = useState(feedbackInnit);
+
+  const totalFeedback =
+    feedbackCounts.good + feedbackCounts.bad + feedbackCounts.neutral;
 
   function recordToLocal() {
-    localStorage.setItem(LS_FEEDBACK, JSON.stringify(rate));
+    localStorage.setItem(LS_FEEDBACK, JSON.stringify(feedbackCounts));
   }
 
-  useEffect(recordToLocal, [rate]);
+  useEffect(recordToLocal, [feedbackCounts]);
 
-  // ! Only add name of your new option in the array badFeedbackKeys BELOW if it's considered as a "bad feedback" variety
-
-  const badFeedbackKeys = ['bad', 'poor'];
-  const badFeedback = Object.fromEntries(
-    Object.entries(rate).filter(([key]) => badFeedbackKeys.includes(key))
+  const initState = Object.fromEntries(
+    Object.keys(feedbackCounts).map(key => [key, 0])
   );
 
-  const initState = Object.fromEntries(Object.keys(rate).map(key => [key, 0]));
-  const isStateInit = Object.keys(rate).every(key => rate[key] === 0);
+  function updateFeedback(feedbackType) {
+    const option = feedbackType;
+    setFeedbackCounts(prevRate => ({
+      ...prevRate,
+      [option]: prevRate[option] + 1,
+    }));
+  }
+  function handleReset() {
+    setFeedbackCounts(initState);
+  }
 
   return (
     <div className={css.container}>
       <Description />
       <Options
-        rate={rate}
-        initState={initState}
-        setRate={setRate}
-        isStateInit={isStateInit}
+        feedbackCounts={feedbackCounts}
+        totalFeedback={totalFeedback}
+        updateFeedback={updateFeedback}
+        handleReset={handleReset}
       />
-      <Feedback
-        rate={rate}
-        isStateInit={isStateInit}
-        badFeedback={badFeedback}
-      />
+      {totalFeedback < 1 ? (
+        <Notification />
+      ) : (
+        <Feedback
+          feedbackCounts={feedbackCounts}
+          totalFeedback={totalFeedback}
+        />
+      )}
     </div>
   );
 }
